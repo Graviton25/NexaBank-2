@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";
+const API_URL = "https://nexabank-jbtp.onrender.com";
 
 function getToken() {
   return localStorage.getItem("nexaBankToken");
