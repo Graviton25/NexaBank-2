@@ -1,0 +1,10 @@
+node_modules/
+*.backup.*
+*.before-*.js
+*.before-*.html
+*.before-*.css
+*.save
+
+backend/auth.json
+backend/nexabank.json
+frontend/style.checkpoint.css

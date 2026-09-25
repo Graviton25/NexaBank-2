@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexaBank</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="bank-logo">N</div>
+
+      <h1>NexaBank</h1>
+      <p class="login-subtitle">Secure Digital Banking</p>
+
+      <form id="loginForm">
+
+        <div class="input-group">
+          <label>Username</label>
+          <input
+            type="text"
+            id="username"
+            placeholder="Enter username"
+            required
+          >
+        </div>
+
+        <div class="input-group">
+          <label>Password</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Enter password"
+            required
+          >
+        </div>
+
+        <button type="submit" class="login-button">
+          Login
+        </button>
+
+        <p id="loginMessage"></p>
+
+      </form>
+
+      <p class="demo-info">
+        Demo account: <b>nathnael</b> / <b>1234</b>
+      </p>
+    </div>
+  </div>
+
+
+  <!-- BANKING DASHBOARD -->
+  <div id="dashboard" style="display:none;">
+
+    <header class="bank-header">
+      <div>
+        <h2>NexaBank</h2>
+        <p id="welcomeUser">Welcome</p>
+      </div>
+
+      <button id="logoutButton" class="logout-button">
+        Logout
+      </button>
+    </header>
+
+
+    <main class="dashboard-container">
+
+      <section class="balance-card">
+        <p>Available Balance</p>
+
+        <h1>
+          <span id="balance">0.00</span> ETB
+        </h1>
+
+        <p id="accountNumber">****4821</p>
+      </section>
+
+
+      <section class="action-buttons">
+
+        <button onclick="depositMoney()">
+          ➕ Deposit
+        </button>
+
+        <button onclick="withdrawMoney()">
+          ➖ Withdraw
+        </button>
+
+        <button onclick="sendMoney()">
+          💸 Send Money
+        </button>
+
+      </section>
+
+
+      <section class="transactions-section">
+
+        <div class="section-title">
+        <div class="transaction-tools">
+          <div class="transaction-search">
+            <span>⌕</span>
+            <input id="transactionSearch" type="search" placeholder="Search transactions...">
+          </div>
+          <div class="transaction-filters">
+            <button class="transaction-filter active" data-filter="all">All</button>
+            <button class="transaction-filter" data-filter="deposit">Deposit</button>
+            <button class="transaction-filter" data-filter="withdraw">Withdraw</button>
+            <button class="transaction-filter" data-filter="transfer">Transfer</button>
+          </div>
+        </div>
+          <h2>Recent Transactions</h2>
+        </div>
+
+        <div id="transactions">
+          Loading transactions...
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <script src="script.js"></script>
+
+<div id="bankModal" class="bank-modal">
+  <div class="bank-modal-content">
+    <button class="bank-modal-close" onclick="closeBankModal()">×</button>
+    <h2 id="modalTitle">Deposit Money</h2>
+    <p id="modalDescription">Enter the amount you want to deposit.</p>
+
+    <div id="recipientGroup" style="display:none;">
+      <label>Recipient Account</label>
+      <input id="modalRecipient" type="text" maxlength="32" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="****1234">
+    </div>
+
+    <label>Amount</label>
+    <input id="modalAmount" type="number" min="1" max="1000000" step="0.01" inputmode="decimal" placeholder="Enter amount">
+
+    <button id="modalConfirm" class="modal-confirm">Continue</button>
+
+    <p id="modalMessage"></p>
+  </div>
+</div>
+
+</body>
+</html>
