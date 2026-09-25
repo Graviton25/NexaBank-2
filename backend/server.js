@@ -5,7 +5,7 @@ const { login } = require("./auth");
 const { createSession, getSession, deleteSession } = require("./sessions");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -218,6 +218,6 @@ app.post("/api/transfer", authenticate, (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`NexaBank API running on port ${PORT}`);
 });
