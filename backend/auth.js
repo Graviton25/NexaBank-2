@@ -1,14 +1,5 @@
-const fs = require("fs");
-const path = require("path");
 const crypto = require("crypto");
-
-const AUTH_FILE = path.join(__dirname, "auth.json");
-
-function getUsers() {
-  return JSON.parse(
-    fs.readFileSync(AUTH_FILE, "utf8")
-  ).users;
-}
+const { pool } = require("./database");
 
 function verifyPassword(password, salt, storedHash) {
   const hash = crypto
@@ -21,29 +12,37 @@ function verifyPassword(password, salt, storedHash) {
   );
 }
 
-function login(username, password) {
-
-  const users = getUsers();
-
-  const user = users.find(
-    user => user.username === username
+async function login(username, password) {
+  const result = await pool.query(
+    `SELECT id, username, salt, password_hash, name, account_number
+     FROM users
+     WHERE username = $1
+     LIMIT 1`,
+    [username]
   );
 
-  if (!user) {
+  if (result.rows.length === 0) {
     return null;
   }
+
+  const user = result.rows[0];
 
   if (
     !verifyPassword(
       password,
       user.salt,
-      user.passwordHash
+      user.password_hash
     )
   ) {
     return null;
   }
 
-  return user;
+  return {
+    id: user.id,
+    username: user.username,
+    name: user.name,
+    accountNumber: user.account_number
+  };
 }
 
 module.exports = {

@@ -8,3 +8,5 @@ node_modules/
 backend/auth.json
 backend/nexabank.json
 frontend/style.checkpoint.css
+
+backend/migrate-to-postgres.js

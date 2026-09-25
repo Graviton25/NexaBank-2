@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { loadData, saveData } = require("./database");
+const { getAccount, getTransactions, updateBalance, addTransaction, pool, initializeDatabase } = require("./database");
 const { login } = require("./auth");
 const { createSession, getSession, deleteSession } = require("./sessions");
 
@@ -10,19 +10,21 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-function getData() {
-  return loadData();
+async function getData() {
+  const account = await getAccount();
+  const transactions = await getTransactions();
+  return { account, transactions };
 }
 
 // Login
-app.post("/api/login", (req, res) => {
+app.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ message: "Username and password are required." });
   }
 
-  const user = login(username, password);
+  const user = await login(username, password);
 
   if (!user) {
     return res.status(401).json({ message: "Invalid username or password." });
@@ -68,19 +70,19 @@ app.get("/", (req, res) => {
 });
 
 // Account
-app.get("/api/account", authenticate, (req, res) => {
-  const data = getData();
+app.get("/api/account", authenticate, async (req, res) => {
+  const data = await getData();
   res.json(data.account);
 });
 
 // Transactions
-app.get("/api/transactions", authenticate, (req, res) => {
-  const data = getData();
+app.get("/api/transactions", authenticate, async (req, res) => {
+  const data = await getData();
   res.json(data.transactions);
 });
 
 // Deposit
-app.post("/api/deposit", authenticate, (req, res) => {
+app.post("/api/deposit", authenticate, async (req, res) => {
   const amount = Number(req.body.amount);
 
   if (!Number.isFinite(amount) || amount <= 0 || amount > 1000000) {
@@ -95,7 +97,7 @@ app.post("/api/deposit", authenticate, (req, res) => {
     });
   }
 
-  const data = getData();
+  const data = await getData();
 
   data.account.balance += amount;
 
@@ -110,7 +112,8 @@ app.post("/api/deposit", authenticate, (req, res) => {
 
   data.transactions.unshift(transaction);
 
-  saveData(data);
+  await updateBalance(data.account.accountNumber, data.account.balance);
+  await addTransaction(transaction);
 
   res.json({
     message: "Deposit successful.",
@@ -120,7 +123,7 @@ app.post("/api/deposit", authenticate, (req, res) => {
 });
 
 // Withdraw
-app.post("/api/withdraw", authenticate, (req, res) => {
+app.post("/api/withdraw", authenticate, async (req, res) => {
   const amount = Number(req.body.amount);
 
   if (!Number.isFinite(amount) || amount <= 0 || amount > 1000000) {
@@ -135,7 +138,7 @@ app.post("/api/withdraw", authenticate, (req, res) => {
     });
   }
 
-  const data = getData();
+  const data = await getData();
 
   if (amount > data.account.balance) {
     return res.status(400).json({
@@ -156,7 +159,8 @@ app.post("/api/withdraw", authenticate, (req, res) => {
 
   data.transactions.unshift(transaction);
 
-  saveData(data);
+  await updateBalance(data.account.accountNumber, data.account.balance);
+  await addTransaction(transaction);
 
   res.json({
     message: "Withdrawal successful.",
@@ -166,7 +170,7 @@ app.post("/api/withdraw", authenticate, (req, res) => {
 });
 
 // Transfer
-app.post("/api/transfer", authenticate, (req, res) => {
+app.post("/api/transfer", authenticate, async (req, res) => {
   const amount = Number(req.body.amount);
 
   if (!Number.isFinite(amount) || amount <= 0 || amount > 1000000) {
@@ -188,7 +192,7 @@ app.post("/api/transfer", authenticate, (req, res) => {
     });
   }
 
-  const data = getData();
+  const data = await getData();
 
   if (amount > data.account.balance) {
     return res.status(400).json({
@@ -209,7 +213,8 @@ app.post("/api/transfer", authenticate, (req, res) => {
 
   data.transactions.unshift(transaction);
 
-  saveData(data);
+  await updateBalance(data.account.accountNumber, data.account.balance);
+  await addTransaction(transaction);
 
   res.json({
     message: "Transfer successful.",
@@ -218,6 +223,13 @@ app.post("/api/transfer", authenticate, (req, res) => {
   });
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`NexaBank API running on port ${PORT}`);
-});
+initializeDatabase()
+  .then(() => {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`NexaBank API running on port ${PORT}`);
+    });
+  })
+  .catch(error => {
+    console.error("Database initialization failed:", error);
+    process.exit(1);
+  });
